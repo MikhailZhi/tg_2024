@@ -22,20 +22,19 @@ async def process_help_command(message: Message):
     )
 
 
-# Этот хэндлер будет срабатывать на любые ваши текстовые сообщения, кроме команд "/start" и "/help"
+# этот хэндлер будет отвечать на все, что не обработали ранее
 @dp.message()
-async def send_echo(message: Message):
-    await message.reply(text=message.text)
+async def send_echo_all(message: Message):
+    print(message.model_dump_json(indent=4, exclude_none=True))  # конструкция для спокойного чтения формата json
+    try:
+        await message.send_copy(chat_id=message.chat.id)
+    except TypeError:
+        await message.reply(
+            text='Данный тип апдейтов не поддерживается '
+                 'методом send_copy'
+        )
 
 
 if __name__ == '__main__':
     print('Запускаем!..')
     dp.run_polling(bot)
-
-"""
-# ! Если не использовать конструкцию "@dp.message()", то придется регистрировать хэндлеры
-# Регистрируем хэндлеры
-dp.message.register(process_start_command, Command(commands='start'))
-dp.message.register(process_help_command, Command(commands='help'))
-dp.message.register(send_echo)
-"""
