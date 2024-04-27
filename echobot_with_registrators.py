@@ -62,5 +62,3 @@ dp.message.register(send_echo_all)
 if __name__ == '__main__':
     print('Запускаем!...')
     dp.run_polling(bot)
-
-# 2024.04.22 - дописал функцию ответа на фото в сообщении. Коммит "Added answer to message with photo"

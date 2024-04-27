@@ -1,0 +1,65 @@
+from aiogram import Bot, Dispatcher, F, Router
+# from aiogram.dispatcher import router
+from aiogram.filters import Command  # , StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+
+# from keyboards.simple_row import make_row_keyboard
+
+BOT_TOKEN = '5785150011:AAFfBxg0EpqYDtYcuARILwXY8BDlk-_qQzs'  # https://t.me/Mike_sdbot reloc_sd_bot
+
+# Создаем объекты бота и диспетчера
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
+
+router = Router()
+
+# Эти значения далее будут подставляться в итоговый текст, отсюда такая на первый взгляд странная форма прилагательных
+available_food_names = ["Суши", "Спагетти", "Хачапури"]
+available_food_sizes = ["Маленькую", "Среднюю", "Большую"]
+
+
+# Создаёт replay-клавиатуру с кнопками в один ряд. * param items: список текстов для кнопок
+# * return: объект replay-клавиатуры
+def make_row_keyboard(items: list[str]) -> ReplyKeyboardMarkup:
+    row = [KeyboardButton(text=item) for item in items]
+    return ReplyKeyboardMarkup(keyboard=[row], resize_keyboard=True)
+
+
+class OrderFood(StatesGroup):
+    choosing_food_name = State()
+    choosing_food_size = State()
+
+
+@dp.message(Command("food"))
+async def cmd_food(message: Message, state: FSMContext):
+    await message.answer(
+        text="Выберите блюдо:",
+        reply_markup=make_row_keyboard(available_food_names)
+    )
+    # Устанавливаем пользователю состояние "выбирает название"
+    await state.set_state(OrderFood.choosing_food_name)
+
+
+@dp.message(OrderFood.choosing_food_name, F.text.in_(available_food_names))
+async def food_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_food=message.text.lower())
+    await message.answer(
+        text="Спасибо. Теперь, пожалуйста, выберите размер порции:",
+        reply_markup=make_row_keyboard(available_food_sizes)
+    )
+    await state.set_state(OrderFood.choosing_food_size)
+
+
+@dp.message(OrderFood.choosing_food_name)
+async def food_chosen_incorrectly(message: Message):
+    await message.answer(
+        text="Я не знаю такого блюда.\n\n"
+             "Пожалуйста, выберите одно из названий из списка ниже:",
+        # reply_markup=make_row_keyboard(available_food_names)
+    )
+
+if __name__ == '__main__':
+    print('Запускаем!..')
+    dp.run_polling(bot)
