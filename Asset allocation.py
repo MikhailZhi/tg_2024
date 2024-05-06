@@ -75,6 +75,11 @@ async def new_investment_target(message, state):
                               f' Цена продажи ожидается {new_investment_data[2]}')
     await state.clear()
 
+
+# функция для записи новой инвестиции в файл эксель
+async def xls():
+    pass
+
 if __name__ == '__main__':
     print('Запускаем!..')
     dp.run_polling(bot)
