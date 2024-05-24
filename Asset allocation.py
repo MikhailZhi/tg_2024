@@ -61,8 +61,8 @@ async def new_investment_title(message, state):
 async def new_investment_cost(message, state):
     new_investment_data.append(message.text)
     print(new_investment_data)
-    await message.reply(text='Введите ожидаемую цену продажи:'
-                             'PS - целое число, без пробелов, в рублях')
+    await message.reply(text='''Введите ожидаемую цену продажи:
+                             PS - целое число, без пробелов, в рублях''')
     await state.set_state(Investment.new_investment_target)
 
 
@@ -74,7 +74,7 @@ async def new_investment_target(message, state):
     await message.answer(text=f'Для инвестиции {new_investment_data[0]}\n'
                               f' Вложения составляют {new_investment_data[1]}\n'
                               f' Цена продажи ожидается {new_investment_data[2]}')
-    await xls()
+    await xls(new_investment_data)
     await state.clear()
 
 # переменные для работы с таблицей
@@ -84,7 +84,7 @@ xlsx_column_titles = ['ID', 'Date', 'Time', 'Title', 'Cost', 'Target']
 
 
 # функция для записи новой инвестиции в файл эксель
-async def xls():
+async def xls(data_4_xlsx: list):
     wb = openpyxl.load_workbook(xlsx_name)  # открываю файл эксель
     sheet = wb[xlsx_sheet_investments]  # загружаю лист текущих инвестиций
     row_count = sheet.max_row
@@ -96,6 +96,16 @@ async def xls():
     for i in range(1, sheet.max_column + 1):  # проверка, что колонки названы верно
         print(f'column {i}, Ok') if sheet.cell(1, i).value == xlsx_column_titles[i - 1] \
             else print(f'column {i}, NOT Ok')
+
+    sheet.cell(row_count + 1, 1).value = sheet.cell(row_count, 1).value + 1
+    sheet.cell(row_count + 1, 2).value = '2024.05.10'
+    sheet.cell(row_count + 1, 3).value = '23:00'
+    sheet.cell(row_count + 1, 4).value = data_4_xlsx[0]
+    sheet.cell(row_count + 1, 5).value = data_4_xlsx[1]
+    sheet.cell(row_count + 1, 6).value = data_4_xlsx[2]
+
+    for i in range(1, sheet.max_column+1):
+        print(f'column {i} - {sheet.cell(row_count + 1, i).value}')
 
     wb.save(xlsx_name)
     wb.close()
