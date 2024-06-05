@@ -11,23 +11,40 @@ column_count = sheet.max_column
 
 samples = []
 samples_dict = {}
-metals = {'As': 'L', 'Cd': 'V', 'Cu': 'AB', 'Ni': 'AS', 'Pb': 'AU', 'Zn': 'BM'}
+metals_columns = {'As': 'L', 'Cd': 'V', 'Cu': 'AB', 'Ni': 'AS', 'Pb': 'AU', 'Zn': 'BM'}
+print(f"A bond between metals and columns: {metals_columns}")
 
-sample_name = sheet.cell(4, 2).value
+sample_name = sheet.cell(5, 2).value
 sample_code = sample_name.split()[0]
-print('sample_code for blank:', sample_code)
-# print(sample_code[:1])
+print(f'A sample_name: {sample_name}')
+print("sample_code for the sample:", sample_code)
+# print(sample_code[:1])  # такой срез дает префикс названия пробы
 
 # sheet.cell(i, 2).value  # покажет названия проб
 for i in range(1, row_count + 1):
     sample_name = sheet.cell(i, 2).value
     # print(f'i={i}, {sheet.cell(i, 2).coordinate} = {sample_name}')
-    sample_code = sheet.cell(i, 2).value.split()[0]
+    sample_code = sheet.cell(i, 2).value.split()[0]  # переписать по получение списка из слов в ячейке
     if sample_code[:2] == "p-":
-        samples.append(sample_code[2:])
+        # Добавить получение суффикса
+        # добавить получение значений по металлам, т.к. у меня пока что есть номер строки
+        samples.append(sample_code[2:])   # список для проб мне сейчас не актуален
         samples_dict[sample_code[2:]] = 0
-print(f'Samples list: {samples}', f'Samples dictionary: {samples_dict}', sep='\n')
+print(f"A list of samples from the file: {samples}", f"A samples dictionary: {samples_dict}\n", sep='\n')
 # print(sheet.cell(1, 20).coordinate, sheet['AU1'].column)  # показывает координаты и столбец ячейки
+
+# тренируюсь грузить данные в словарь
+sample_name = sheet.cell(5, 2).value
+sample_cell_name = sample_name.split()
+sample_suffix = sample_cell_name[1]
+print(f'A suffix for a sample: {sample_suffix}')
+samples_dict_2 = {}
+print(f'\nA sample dict before: {samples_dict_2}')
+samples_dict_2[sample_cell_name[0][2:]] = {sample_suffix: {}}
+print(f'A sample dict after: {samples_dict_2}')
+
+# пробую грузить в словарь
+
 
 # проверка правильных названий столбцов
 
