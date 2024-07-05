@@ -20,23 +20,33 @@ metals_columns = {'As': 'L', 'Cd': 'V', 'Cu': 'AB', 'Ni': 'AS', 'Pb': 'AU', 'Zn'
 print(f"A bond between metals and columns: {metals_columns}")
 
 for i in range(1, row_count + 1):
-    sample_name = sheet.cell(i, 2).value
+    sample_name = sheet.cell(i, 2).value  # извлекаю полное название из ячейки
     # print(f'i={i}, {sheet.cell(i, 2).coordinate} = {sample_name}')
-    sample_code_with_prefix = sheet.cell(i, 2).value.split()[0]  # переписать по получение списка из слов в ячейке
-    sample_code = sample_code_with_prefix[2:]
-    if sample_code_with_prefix[:2] == "p-":
-
-        sample_suffix = sheet.cell(i, 2).value.split()[1]  # получаю суффикс пробы
-        samples_dict[sample_code] = {sample_suffix: {}}  # записал суффикс в словарь
+    sample_code_with_prefix = sheet.cell(i, 2).value.split()[0]  # получение списка из слов в ячейке
+    sample_code = sample_code_with_prefix[2:]  # выделяю числовой номер пробы и растворитель
+    if sample_code_with_prefix[:2] == "p-":  # перебираю только то, что помечено, как почва
+        sample_suffix = sheet.cell(i, 2).value.split()[1]  # получаю суффикс (экстрагент) пробы
+        samples_dict[sample_suffix] = {sample_code: {}}  # пробую через суффикс записать дальше значения
+        print(f'sample_suffix ={sample_suffix}, sample_code={sample_code}')
+        # samples_dict[sample_code] = {sample_suffix: {}}  # записал суффикс в словарь
 
         # Записываю значения по металлам в словарь
         for metal in metals_columns:
-            samples_dict[sample_code][sample_suffix][metal] = \
-                {sheet.cell(i, sheet[metals_columns[metal] + str(i)].column).value}
+            samples_dict[sample_suffix][sample_code][metal] = \
+                sheet.cell(i, sheet[metals_columns[metal] + str(i)].column).value
+        print(f'samples_dict: {samples_dict}')
 
-        samples.append(sample_code)   # список для проб мне сейчас не актуален
-        # samples_dict[sample_code[2:]] = 0
-print(f"A list of samples from the file: {samples}", f"A samples dictionary: {samples_dict}\n", sep='\n')
+print(samples_dict)  # печатаю словарь "как есть", чтобы ориентироваться
+# красиво печатаю получившийся словарь
+for suffix in samples_dict:
+    print(f'Sample - {suffix}; ', end='')
+    for sample in samples_dict[suffix]:
+        print(f'suffix = {suffix}:')
+        for metal in samples_dict[suffix][sample]:
+            if samples_dict[suffix][sample][metal] <= 0:
+                samples_dict[suffix][sample][metal] = 0
+            print(f'metal - {metal}, concentration = {(samples_dict[suffix][sample][metal]):.3f}')
+    print()
 
 # Сохраняю книгу в файл и закрываю
 wb.save(xlsx_name)
