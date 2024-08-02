@@ -19,41 +19,34 @@ metals_columns = {'As': 'L', 'Cd': 'V', 'Cu': 'AB', 'Ni': 'AS', 'Pb': 'AU', 'Zn'
 
 print(f"A bond between metals and columns: {metals_columns}")
 
-# структура:
-# {123:[{HCl:{blank:21, Co:34}}, {HF:{blank:32, Co:54}}]} - пример
-# { [ {key1: {}, key2: {}}, {}] }
-
 for i in range(1, row_count + 1):
     sample_code_with_prefix = sheet.cell(i, 2).value.split()[0]  # получение списка из слов в ячейке
-    print(f'sample_code_with_prefix={sample_code_with_prefix}')
     sample_code = sample_code_with_prefix[2:]  # выделяю числовой номер пробы и растворитель
     if sample_code_with_prefix[:2] == "p-":  # перебираю только то, что помечено, как почва
         sample_suffix = sheet.cell(i, 2).value.split()[1]  # получаю суффикс (экстрагент) пробы
         if sample_code not in samples_dict.keys():
-            samples_dict[sample_code] = []  # записываю имя пробы и пустой словарь для значений
-        print(f'sample_suffix= {sample_suffix}, sample_code={sample_code}')
+            samples_dict[sample_code] = []  # записываю имя пробы и пустой список для значений
         samples_dict[sample_code].append({sample_suffix: {}})  # записываю суффикс
 
         # Записываю значения по металлам в словарь
         for metal in metals_columns:
             samples_dict[sample_code][len(samples_dict[sample_code]) - 1][sample_suffix][metal] = \
                 sheet.cell(i, sheet[metals_columns[metal] + str(i)].column).value
-        print(f'samples_dict: {samples_dict}')
 
-print(samples_dict)  # печатаю словарь "как есть", чтобы ориентироваться
+# print('\n', samples_dict, '\n')  # печатаю словарь "как есть", чтобы ориентироваться
 
-
-# красиво печатаю получившийся словарь
-# пока не печатаю, т.к. переделываю структуру
-'''for suffix in samples_dict:
-    print(f'Sample - {suffix}; ', end='')
-    for sample in samples_dict[suffix]:
-        print(f'suffix = {suffix}:')
-        for metal in samples_dict[suffix][sample]:
-            if samples_dict[suffix][sample][metal] <= 0:
-                samples_dict[suffix][sample][metal] = 0
-            print(f'metal - {metal}, concentration = {(samples_dict[suffix][sample][metal]):.3f}')
-    print()'''
+# структура:
+# {123:[{HCl:{blank:21, Co:34}}, {HF:{blank:32, Co:54}}], 345:[...] } - пример
+# { [ {key1: {}, key2: {}}, {}] }
+# Красиво печатаю получившийся словарь
+for sample_code in samples_dict:
+    # print(f'Sample - {sample_code}; ', end='')  # печатаю имя пробы
+    for i in range(len(samples_dict[sample_code])):  # перебираю значения в списке, дальше нужен индекс, поэтому так
+        for suffix in samples_dict[sample_code][i]:
+            print(f'Sample - {sample_code}; Extraction: {suffix}', end='\n\tValues: ')  # печатаю чем экстрагировали
+            for met in samples_dict[sample_code][i][suffix]:   # перебираю металлы
+                print(f'{met}:{samples_dict[sample_code][i][suffix][met]:.4f} ', end=' ')   # печать значений
+            print()
 
 # Сохраняю книгу в файл и закрываю
 wb.save(xlsx_name)
